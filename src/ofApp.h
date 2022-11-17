@@ -1,6 +1,9 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxNetwork.h"
+#include "ofxGui.h"
+#define BUFFER_SIZE 100
 
 class ofApp : public ofBaseApp{
 
@@ -8,6 +11,13 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
+        void drawMenu();
+        void drawServer();
+        void drawClient();
+
+        //metodos de los botones
+        void createServer();
+        void connectClient();
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -19,7 +29,12 @@ class ofApp : public ofBaseApp{
 		void mouseExited(int x, int y);
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
-		void gotMessage(ofMessage msg);
+        void gotMessage(ofMessage msg);
+
+        //menu principal
+        ofxPanel mainPanel;
+        ofxButton btnServer;
+        ofxButton btnClient;
 
         //variables de las raquetas y pelota
         ofVec2f * posPelota;
@@ -31,6 +46,16 @@ class ofApp : public ofBaseApp{
         //estado del input
         bool w,s;
 
+        //modos de la aplicacion
+        enum EAppState
+        {
+            mainmenu, server, client
+        };
+        EAppState appState;
 
-		
+        //variables de red
+        ofxUDPManager udpManager;
+        int gamePort = 6666;
+        char buffer[BUFFER_SIZE];
+
 };
