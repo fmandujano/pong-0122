@@ -41,7 +41,7 @@ void ofApp::connectClient()
     udpManager.Create();
 
     //establecer conexion
-    string serverIP = ofSystemTextBoxDialog("Ingresa IP del servidor");
+    string serverIP = ofSystemTextBoxDialog("Ingresa IP del servidor", "127.0.0.1");
     udpManager.Connect(  serverIP.c_str()  , gamePort);
 }
 
@@ -72,13 +72,26 @@ void ofApp::update()
             velPelota->y *= -1;
         }
 
+        //serializar datos
+        memset( buffer, 0, BUFFER_SIZE);
+        sprintf(buffer, "%f,%f,%f,%f",posPelota->x, posPelota->y, posPlayer1->x, posPlayer1->y );
+        //enviar datos al cliente
+        udpManager.SendAll(buffer, BUFFER_SIZE);
+
         //recibir datos del cliente
         memset( buffer, 0, BUFFER_SIZE);
         if( udpManager.Receive(buffer, BUFFER_SIZE)>0 )
         {
             printf("%s \n ", buffer);
-
+            //desserializacion
             //hay que convertir buffer en posPlayer2
+            //el valor de posicion llega como "x,y"
+            char * temp;
+            temp = strtok( buffer, "," );
+            //temp contiene el valor posx
+            posPlayer2->x = atoi(temp);
+            temp = strtok( NULL, ",");
+            posPlayer2->y = atoi(temp);
         }
     }
     else if(appState==EAppState::client)
@@ -92,11 +105,26 @@ void ofApp::update()
         //serializacion del vector de pos del player 2
         sprintf( buffer,  "%f, %f", posPlayer2->x, posPlayer2->y );
         udpManager.Send(buffer, BUFFER_SIZE);
+
+        //recibir datos del servidor
+
+        if( udpManager.Receive(buffer, BUFFER_SIZE)> 0)
+        {
+            puts(buffer);
+            //deserializar datos
+            char * temp ;
+
+            temp = strtok( buffer, "," );
+            posPelota->x = atoi(temp);
+            temp = strtok( NULL, ",");
+            posPelota->y = atoi(temp);
+            temp = strtok( NULL, ",");
+            posPlayer1->x = atoi(temp);
+            temp = strtok( NULL, ",");
+            posPlayer1->y = atoi(temp);
+        }
+
     }
-
-
-
-
 }
 
 //--------------------------------------------------------------
