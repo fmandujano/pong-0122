@@ -3,6 +3,10 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+    if(fpslimit)
+        ofSetFrameRate(20);
+    else
+        ofSetFrameRate(60);
     //inicializar los valores de pos y vel
     posPelota = new ofVec2f(ofGetWidth()/2, ofGetHeight()/2);
     velPelota = new ofVec2f(100,100);
@@ -39,7 +43,8 @@ void ofApp::connectClient()
 
     //crear socket
     udpManager.Create();
-
+    //la linea que faltaba (!)
+    udpManager.SetNonBlocking(true);
     //establecer conexion
     string serverIP = ofSystemTextBoxDialog("Ingresa IP del servidor", "127.0.0.1");
     udpManager.Connect(  serverIP.c_str()  , gamePort);
@@ -106,8 +111,41 @@ void ofApp::update()
         sprintf( buffer,  "%f, %f", posPlayer2->x, posPlayer2->y );
         udpManager.Send(buffer, BUFFER_SIZE);
 
-        //recibir datos del servidor
+        string message;
+        string tempMessage;
+        bool getNext = true;
 
+        //corregir el retraso o delay.
+        while(getNext)
+        {
+            udpManager.Receive(buffer, BUFFER_SIZE);
+            tempMessage = buffer;
+            if (tempMessage=="")
+            {
+                getNext = false;
+            }
+            else
+            {
+                message = tempMessage;
+                //puts("ignoring");
+            }
+        }
+        if(message!="")
+        {
+            char * temp ;
+            strcpy( buffer, message.c_str()  );
+            temp = strtok( buffer, "," );
+            posPelota->x = atoi(temp);
+            temp = strtok( NULL, ",");
+            posPelota->y = atoi(temp);
+            temp = strtok( NULL, ",");
+            posPlayer1->x = atoi(temp);
+            temp = strtok( NULL, ",");
+            posPlayer1->y = atoi(temp);
+        }
+
+        //recibir datos del servidor
+        /*
         if( udpManager.Receive(buffer, BUFFER_SIZE)> 0)
         {
             puts(buffer);
@@ -123,7 +161,7 @@ void ofApp::update()
             temp = strtok( NULL, ",");
             posPlayer1->y = atoi(temp);
         }
-
+        */
     }
 }
 

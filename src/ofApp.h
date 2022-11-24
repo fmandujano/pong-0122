@@ -31,6 +31,9 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
 
+        //variables de configuracion
+        bool fpslimit=true;
+
         //menu principal
         ofxPanel mainPanel;
         ofxButton btnServer;
